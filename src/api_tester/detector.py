@@ -25,6 +25,7 @@ class ApiProfile:
     endpoint: str = ''
     headers: Dict[str, str] = field(default_factory=dict)
     payload_guide: Dict[str, Any] = field(default_factory=dict)
+    models: List[str] = field(default_factory=list)
 
 
 def _join_url(base: str, path: str) -> str:
@@ -120,11 +121,25 @@ def _extract_model_id(data: Optional[Dict[str, Any]], preferred_model: Optional[
     return 'unknown'
 
 
+def _collect_models(data: Optional[Dict[str, Any]]) -> List[str]:
+    models: List[str] = []
+    if data:
+        items = data.get('data')
+        if isinstance(items, list):
+            for item in items:
+                if isinstance(item, dict):
+                    model_id = item.get('id') or item.get('name')
+                    if model_id:
+                        models.append(str(model_id))
+    return models
+
+
 def _openai_profile(
     base_url: str,
     api_key: Optional[str],
     preferred_model: Optional[str],
     response: httpx.Response,
+    models: Optional[List[str]] = None,
 ) -> ApiProfile:
     data = _parse_json(response)
     model = _extract_model_id(data, preferred_model)
@@ -145,6 +160,7 @@ def _openai_profile(
         endpoint=_join_url(base_url, 'chat/completions'),
         headers=headers,
         payload_guide=payload_guide,
+        models=models or [],
     )
 
 
@@ -153,6 +169,7 @@ def _anthropic_profile(
     api_key: Optional[str],
     preferred_model: Optional[str],
     response: Optional[httpx.Response] = None,
+    models: Optional[List[str]] = None,
 ) -> ApiProfile:
     data = _parse_json(response) if response is not None else None
     model = _extract_model_id(data, preferred_model)
@@ -176,6 +193,7 @@ def _anthropic_profile(
         endpoint=_join_url(base_url, 'messages'),
         headers=headers,
         payload_guide=payload_guide,
+        models=models or [],
     )
 
 
@@ -202,7 +220,14 @@ def detect(
             except httpx.HTTPError:
                 continue
             if _looks_like_openai(response):
-                return _openai_profile(base, api_key, preferred_model, response)
+                data = _parse_json(response)
+                return _openai_profile(
+                    base,
+                    api_key,
+                    preferred_model,
+                    response,
+                    models=_collect_models(data),
+                )
 
         # Anthropic-compatible probe
         anthropic_headers = {
@@ -222,9 +247,23 @@ def detect(
                 pass
 
             if models_response is not None and _looks_like_anthropic(models_response):
-                return _anthropic_profile(base, api_key, preferred_model, models_response)
+                data = _parse_json(models_response)
+                return _anthropic_profile(
+                    base,
+                    api_key,
+                    preferred_model,
+                    models_response,
+                    models=_collect_models(data),
+                )
             if messages_response is not None and _looks_like_anthropic(messages_response):
-                return _anthropic_profile(base, api_key, preferred_model, messages_response)
+                data = _parse_json(messages_response)
+                return _anthropic_profile(
+                    base,
+                    api_key,
+                    preferred_model,
+                    messages_response,
+                    models=_collect_models(data),
+                )
 
     model = preferred_model if preferred_model and preferred_model.strip() else 'unknown'
     return ApiProfile(
