@@ -14,6 +14,9 @@ dependencies = [
     "pytest",
 ]
 
+[project.scripts]
+api_tester = "api_tester.app:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

@@ -243,5 +243,10 @@ class ApiTesterApp(App):
             self.notify('연결 실패', severity='error')
 
 
-if __name__ == '__main__':
+def main() -> None:
+    '''Run the api_tester TUI.'''
     ApiTesterApp().run()
+
+
+if __name__ == '__main__':
+    main()
