@@ -1,7 +1,9 @@
+import json
+
 import httpx
 
 from api_tester.detector import ApiProfile
-from api_tester.tester import test_connection
+from api_tester.tester import check_connection
 
 
 def _openai_profile() -> ApiProfile:
@@ -28,15 +30,15 @@ def test_openai_success():
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.path == '/v1/chat/completions'
         assert request.headers['Authorization'] == 'Bearer test-key'
-        body = request.read()
-        assert b'"max_tokens": 1' in body
-        assert b'"content": "ping"' in body
+        body = json.loads(request.read())
+        assert body['max_tokens'] == 1
+        assert body['messages'] == [{'role': 'user', 'content': 'ping'}]
         return httpx.Response(200, json={'id': 'test', 'choices': []})
 
     transport = httpx.MockTransport(handler)
     profile = _openai_profile()
     with httpx.Client(transport=transport) as client:
-        result = test_connection(profile, client=client)
+        result = check_connection(profile, client=client)
 
     assert result['status'] == 200
     assert result['available'] is True
@@ -51,7 +53,7 @@ def test_openai_failure():
     transport = httpx.MockTransport(handler)
     profile = _openai_profile()
     with httpx.Client(transport=transport) as client:
-        result = test_connection(profile, client=client)
+        result = check_connection(profile, client=client)
 
     assert result['status'] == 401
     assert result['available'] is False
@@ -63,12 +65,15 @@ def test_anthropic_success():
         assert request.url.path == '/messages'
         assert request.headers['x-api-key'] == 'test-key'
         assert request.headers['anthropic-version'] == '2023-06-01'
+        body = json.loads(request.read())
+        assert body['max_tokens'] == 1
+        assert body['messages'] == [{'role': 'user', 'content': 'ping'}]
         return httpx.Response(200, json={'id': 'msg_test', 'content': []})
 
     transport = httpx.MockTransport(handler)
     profile = _anthropic_profile()
     with httpx.Client(transport=transport) as client:
-        result = test_connection(profile, client=client)
+        result = check_connection(profile, client=client)
 
     assert result['status'] == 200
     assert result['available'] is True
@@ -85,7 +90,7 @@ def test_anthropic_failure():
     transport = httpx.MockTransport(handler)
     profile = _anthropic_profile()
     with httpx.Client(transport=transport) as client:
-        result = test_connection(profile, client=client)
+        result = check_connection(profile, client=client)
 
     assert result['status'] == 400
     assert result['available'] is False
@@ -94,7 +99,7 @@ def test_anthropic_failure():
 
 def test_unknown_profile():
     profile = ApiProfile(api_type='unknown', base_url='https://example.com', model='x')
-    result = test_connection(profile)
+    result = check_connection(profile)
 
     assert result['available'] is False
     assert 'Unsupported' in result['error']

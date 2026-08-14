@@ -13,7 +13,7 @@ import httpx
 from .detector import ApiProfile
 
 
-def test_connection(
+def check_connection(
     profile: ApiProfile,
     timeout: float = 10.0,
     client: Optional[httpx.Client] = None,
@@ -72,4 +72,4 @@ def test_connection(
         }
 
 
-__all__ = ['test_connection']
+__all__ = ['check_connection']
