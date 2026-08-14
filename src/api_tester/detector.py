@@ -130,7 +130,7 @@ def _openai_profile(
     model = _extract_model_id(data, preferred_model)
     context_size = estimate_context_size(model)
     max_tokens = estimate_max_tokens(model)
-    auth_header = 'Authorization: Bearer ' + (api_key or '')
+    auth_header = 'Bearer ' + (api_key or '')
     headers = {'Authorization': auth_header}
     payload_guide = {
         'model': model,
