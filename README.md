@@ -78,6 +78,19 @@ Fields shown in connection test results:
 - `available`: `true` on 2xx responses, otherwise `false`
 - `error`: response body or exception message on 4xx/5xx
 
+## Deployment (CI/CD)
+
+This package is published to PyPI automatically via GitHub Actions.
+
+- **PyPI package**: [`apiprobe`](https://pypi.org/project/apiprobe/) — version `1.0.1` is live (published 2026-08-15).
+- **Release flow**: pushing a tag matching `v*` (or manually via `workflow_dispatch`) triggers `.github/workflows/publish.yml`.
+- **Pipeline**:
+  1. **Test job**: installs the package with `pip install -e .` and runs `pytest tests/ -v`.
+  2. **Publish job**: uses **Trusted Publishing (OIDC)** with `permissions: id-token: write` — no API token or username/password is needed.
+  3. Builds a wheel and uploads it to PyPI with **attestations** (`attestations: true`).
+- **Trusted Publisher**: registered on PyPI as `uptodatelabs / apiprobe / publish.yml`. It starts as *pending* and becomes *active* after the first successful release.
+- **Release history**: `v1.0.1` (tag `a63d236`) → PyPI `apiprobe 1.0.1` (2026-08-15).
+
 ---
 
 # apiprobe
@@ -159,3 +172,16 @@ detector(`src/api_tester/detector.py`)는 입력된 base_url에 대해:
 - `latency_ms`: 요청 시작부터 응답 수신까지의 왕복 지연 (ms)
 - `available`: 2xx 응답이면 `true`, 아니면 `false`
 - `error`: 4xx/5xx일 때 응답 본문 또는 예외 메시지
+
+## 배포 (CI/CD)
+
+이 패키지는 GitHub Actions를 통해 PyPI에 자동 배포됩니다.
+
+- **PyPI 패키지**: [`apiprobe`](https://pypi.org/project/apiprobe/) — `1.0.1` 버전이 배포되어 있습니다 (2026-08-15 게시).
+- **배포 흐름**: `v*` 패턴의 태그 push(또는 수동 `workflow_dispatch`) 시 `.github/workflows/publish.yml`이 실행됩니다.
+- **파이프라인**:
+  1. **테스트 잡**: `pip install -e .`로 패키지를 설치하고 `pytest tests/ -v`를 실행합니다.
+  2. **배포 잡**: `permissions: id-token: write`를 사용한 **Trusted Publishing(OIDC)** 방식 — API 토큰이나 아이디/비밀번호가 필요 없습니다.
+  3. wheel을 빌드해 **attestations**(`attestations: true`)과 함께 PyPI에 업로드합니다.
+- **Trusted Publisher**: PyPI에 `uptodatelabs / apiprobe / publish.yml`로 등록되어 있습니다. 첫 배포 전에는 *pending* 상태이며, 첫 배포 성공 시 *active*로 전환됩니다.
+- **릴리스 기록**: `v1.0.1` (태그 `a63d236`) → PyPI `apiprobe 1.0.1` (2026-08-15 배포).
