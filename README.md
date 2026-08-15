@@ -1,4 +1,4 @@
-# api_tester
+# apiprobe
 
 TUI-based API testing tool built with Textual and httpx.
 
@@ -7,10 +7,10 @@ It automatically detects OpenAI/Anthropic-compatible API endpoints, infers the m
 ## Installation & Usage
 
 ```bash
-pip install -e .
-api_tester
-# or
-python -m api_tester
+pip install apiprobe
+apiprobe
+# or, for local development:
+# pip install -e .
 ```
 
 Once the TUI starts:
@@ -80,7 +80,7 @@ Fields shown in connection test results:
 
 ---
 
-# api_tester
+# apiprobe
 
 Textual과 httpx로 만든 TUI 기반 API 테스트 도구입니다.
 
@@ -89,10 +89,10 @@ OpenAI/Anthropic 호환 API 엔드포인트를 자동 감지하고 모델의 con
 ## 설치 및 실행 방법
 
 ```bash
-pip install -e .
-api_tester
-# 또는
-python -m api_tester
+pip install apiprobe
+apiprobe
+# 또는 로컬 개발 시:
+# pip install -e .
 ```
 
 TUI가 실행되면:

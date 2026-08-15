@@ -3,8 +3,8 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "api-tester"
-version = "1.0.0"
+name = "apiprobe"
+version = "1.0.1"
 description = "API testing tool with a Textual TUI"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-api_tester = "api_tester.app:main"
+apiprobe = "api_tester.app:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
