@@ -6,6 +6,9 @@ on:
       - "v*"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Run tests
@@ -32,6 +35,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      id-token: write  # Trusted Publishing(OIDC) 및 attestations에 필수
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -50,6 +55,4 @@ jobs:
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          username: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          trusted-publishing: never
+          attestations: true
